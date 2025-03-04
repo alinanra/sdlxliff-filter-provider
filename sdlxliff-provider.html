@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDLXLIFF Filter by Provider (QE)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            width: 60%;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="file"] {
+            padding: 10px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: scroll;
+        }
+        pre {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SDLXLIFF Filter by Provider (QE)</h1>
+
+        <input type="file" id="fileInput" accept=".sdlxliff">
+        <button onclick="loadAndFilterFile()">Filter by Provider "QE"</button>
+
+        <div id="result">
+            <h3>Filtered Segments:</h3>
+            <pre id="filteredSegments">No file loaded yet.</pre>
+        </div>
+    </div>
+
+    <script>
+        function loadAndFilterFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const xmlText = event.target.result;
+                parseAndFilterXML(xmlText);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseAndFilterXML(xmlText) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+            const segments = xmlDoc.getElementsByTagName('seg'); // Get all segments
+            const filteredSegments = [];
+
+            // Loop through segments and check the provider condition
+            for (let i = 0; i < segments.length; i++) {
+                const segment = segments[i];
+                const originSystem = segment.getAttribute('origin-system');
+
+                // If the segment's origin-system is "QE", add to filtered list
+                if (originSystem === 'QE') {
+                    filteredSegments.push(segment.textContent.trim());
+                }
+            }
+
+            displayFilteredSegments(filteredSegments);
+        }
+
+        function displayFilteredSegments(segments) {
+            const resultDiv = document.getElementById('filteredSegments');
+            if (segments.length > 0) {
+                resultDiv.textContent = segments.join('\n\n');
+            } else {
+                resultDiv.textContent = 'No segments found with origin-system="QE".';
+            }
+        }
+    </script>
+</body>
+</html>
